@@ -11,10 +11,10 @@ class client:
         except:
             print('connection fail')
 
-    def send(self, msg):
+    def sendmsg(self, msg):
         self.clientSocket.send(msg.encode())
 
-    def sendmeg(self):
+    def sendmegwork(self):
         while True:
             try:
                 print("input what you want to send: \n")
@@ -40,7 +40,7 @@ class client:
 
     def work(self):
         Thread(target=self.receive).start()
-        Thread(target=self.sendmeg).start()
+        Thread(target=self.sendmegwork).start()
 
 
 

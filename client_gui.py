@@ -40,9 +40,10 @@ def main():
     aclient = client()
 
     userid = "nobody"
-    bg_color_me = "#66FFFF"
-    bg_color_sys = "#7CFC00"
-    bg_color_sqr = "#ffd258"  
+    bg_color_me = "#66FFFF" #color of your own message
+    bg_color_sys = "#7CFC00" #color of the system message from server
+    bg_color_sqr = "#ffd258"   #color of the message that all the client can see
+    bg_color_pri = "#D8BFD8" #color of the message that send to you
 
     #the gui of client
     sg.theme("BlueMono")
@@ -129,11 +130,17 @@ def main():
             room = val[2]
             msg = val[3]                                    
             if messagetype[msgtp] == "normal message":
-                if roomtype[room] == "Square" or roomtype[room] == values["-ROOMS_OPTION-"]:
+                if roomtype[room] == "Square":
                     sg.cprint(
                         f"{msg}\n",
                         c=("#000000", bg_color_sqr),
                     )
+                else:
+                    sg.cprint(
+                        f"{msg}\n",
+                        c=("#000000", bg_color_pri),
+                    )
+
             if messagetype[msgtp] == "connection": #get the username
                 userid = msg
                 sg.cprint(

@@ -6,11 +6,11 @@ messagetype = {
 
 roomtype = {
     0: "Square",
-    1: "Private Room 1",
-    2: "Private Room 2",
-    3: "Private Room 3",
-    4: "Private Room 4",
-    5: "Private Room 5",
+    1: "Alice",
+    2: "Bob",
+    3: "Carol",
+    4: "Dave",
+    5: "Eve",
 }
 
 def analysis_msg(msg):

@@ -20,14 +20,12 @@ class sever:
     def connect(self):
         while True:
             client, address = self.severSocket.accept()
-            successmsg = "Connect successfully!"
             self.cAccount[client] = self.namelist[self.clientNumber] #give the client a name
             print('Connect with '+self.cAccount[client]+" successfully\n")
+            client.send(("10"+self.cAccount[client]).encode())
             self.clientNumber = self.clientNumber + 1
             if self.clientNumber == 5:
                 self.clientNumber = 0
-            send_message = "0"+"0"+successmsg
-            client.send(send_message.encode())
             self.clients.append(client)
 
             #when a client gets connected, start a thread to receive message

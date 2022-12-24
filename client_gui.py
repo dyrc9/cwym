@@ -40,7 +40,9 @@ def main():
     aclient = client()
 
     userid = "nobody"
-    cncted = 0 #make sure only connect once
+    bg_color_me = "#66FFFF"
+    bg_color_sys = "#7CFC00"
+    bg_color_sqr = "#ffd258"  
 
     #the gui of client
     sg.theme("BlueMono")
@@ -49,17 +51,17 @@ def main():
         [sg.Titlebar("Chat Client")],
         [
             sg.Text(
-                f"Nickname: {userid}", font="Franklin 12 bold", text_color="blue"
+                f"Nickname: {userid}", key = "-NAME-", font="Franklin 12 bold", text_color="blue"
             ),
             sg.Push(),
             sg.Combo(  # sg.Combo sg.OptionMenu
                 [
                     "Square",
-                    "Private Room 1",
-                    "Private Room 2",
-                    "Private Room 3",
-                    "Private Room 4",
-                    "Private Room 5",
+                    "Alice",
+                    "Bob",
+                    "Carol",
+                    "Dave",
+                    "Eve",
                 ],
                 font="Franklin 12",
                 size=(13, 10),
@@ -125,36 +127,42 @@ def main():
             clock = val[0]
             msgtp = val[1] #the type of the message
             room = val[2]
-            msg = val[3]
-            bg_color = "#ffd258"
-            # sg.cprint(
-            #             f"{msg}\n",
-            #             c=("#000000", bg_color),
-            #         )
+            msg = val[3]                                    
             if messagetype[msgtp] == "normal message":
                 if roomtype[room] == "Square" or roomtype[room] == values["-ROOMS_OPTION-"]:
                     sg.cprint(
                         f"{msg}\n",
-                        c=("#000000", bg_color),
+                        c=("#000000", bg_color_sqr),
                     )
-            if messagetype[msgtp] == "connection":
-                if cncted == 0:
-                    cncted = 1
-                    userid = msg       
+            if messagetype[msgtp] == "connection": #get the username
+                userid = msg
+                sg.cprint(
+                    f"Connect successfully! your name is {userid}\n",
+                    c=("#000000", bg_color_sys),
+                )
+                window["-NAME-"].update(f"Your name: {userid}")
+
 
         if event == "-SEND-":
             msg = f"{values['-INPUT-']}"
             room = values["-ROOMS_OPTION-"]
             if room == "Square":
                 roomtp = 0
-            else:
-                roomtp = int(room[-1])
-            msg_send = generate_msg(0, 0, msg)
+            elif room == "Alice":
+                roomtp = 1
+            elif room == "Bob":
+                roomtp = 2
+            elif room == "Carol":
+                roomtp = 3
+            elif room == "Dave":
+                roomtp = 4
+            elif room == "Eve":
+                roomtp = 5
+            msg_send = generate_msg(0, roomtp, msg)
             aclient.sendmsg(msg_send)
-            bg_color = "#66FFFF"
             sg.cprint(
                 (userid+time.strftime("%a %b %d %H:%M:%S %Y", time.localtime())+"\n"+msg+"\n"),
-                c=("#000000", bg_color),
+                c=("#000000", bg_color_me),
             )
             window["-INPUT-"].update("")
 

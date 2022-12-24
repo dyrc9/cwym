@@ -2,7 +2,7 @@ from threading import Thread
 import time
 import sys
 from utils import *
-import string
+import random
 
 from TCPclient import client
 import PySimpleGUI as sg
@@ -46,7 +46,8 @@ def main():
     bg_color_pri = "#D8BFD8" #color of the message that send to you
 
     #the gui of client
-    sg.theme("BlueMono")
+    theme = random.choice(sg.theme_list())
+    sg.theme(theme)
     #roomid = "test"
     layout = [
         [sg.Titlebar("Chat Client")],
@@ -70,13 +71,14 @@ def main():
                 enable_events=True,
                 readonly=True,
                 background_color='#FFFFFF',
+                text_color = "#000000",
                 key="-ROOMS_OPTION-",
             ),
          ],
         #the output 
         [
             sg.Multiline(
-                f" Hello {userid}!\n Welcome to the cwym chat!\n\n",
+                f" Hello!\n Welcome to the cwym chat!\n\n",
                 font="Franklin 11",
                 no_scrollbar=True,
                 size=(50, 20),
@@ -108,6 +110,7 @@ def main():
             sg.Button("Send", size=(12, 1), key="-SEND-", button_color="#219F94"),
             sg.Push(),
             # sg.Button("Save Chat As...", key="-SAVE_LOG-"),
+            sg.Button("Who are here?", size=(12,1), key="-ANYONE-"),
             sg.Button("Exit", size=(12, 1), key="-EXIT-"),
         ],
     ]
@@ -149,6 +152,12 @@ def main():
                 )
                 window["-NAME-"].update(f"Your name: {userid}")
 
+            if messagetype[msgtp] == "askstatus":
+                sg.cprint(
+                        f"{msg}\n",
+                        c=("#000000", bg_color_sys),
+                    )
+
 
         if event == "-SEND-":
             msg = f"{values['-INPUT-']}"
@@ -168,10 +177,15 @@ def main():
             msg_send = generate_msg(0, roomtp, msg)
             aclient.sendmsg(msg_send)
             sg.cprint(
-                (userid+time.strftime("%a %b %d %H:%M:%S %Y", time.localtime())+"\n"+msg+"\n"),
+                (userid+" "+time.strftime("%a %b %d %H:%M:%S %Y", time.localtime())+"\n"+msg+"\n"),
                 c=("#000000", bg_color_me),
             )
             window["-INPUT-"].update("")
+
+        if event == "-ANYONE-":
+            msg_send = generate_msg(2, 0, 1)
+            aclient.sendmsg(msg_send)
+
 
     window.close()
     sys.exit()

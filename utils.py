@@ -1,7 +1,7 @@
 messagetype = {
     0: "normal message",
     1: "connection",
-    2: "change name"
+    2: "askstatus"
 }
 
 roomtype = {

@@ -48,6 +48,7 @@ def main():
         if event == "-GET_STATUS-":
             for i in asever.clients:
                 sg.cprint(asever.cAccount[i])
+            sg.cprint("\n")
 
     window.close()
     sys.exit()

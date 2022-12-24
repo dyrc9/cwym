@@ -22,11 +22,12 @@ class sever:
             client, address = self.severSocket.accept()
             self.cAccount[client] = self.namelist[self.clientNumber] #give the client a name
             print('Connect with '+self.cAccount[client]+" successfully\n")
-            client.send(("10"+self.cAccount[client]).encode())
             self.clientNumber = self.clientNumber + 1
             if self.clientNumber == 5:
                 self.clientNumber = 0
             self.clients.append(client)
+            #client.send(("10"+self.cAccount[client]).encode()) #substituded by the next line
+            self.forward2sb(self.cAccount[client], client, 0, 1)
 
             #when a client gets connected, start a thread to receive message
             Thread(target=self.receive, args=(client,address)).start()
@@ -51,6 +52,12 @@ class sever:
                     self.forward(con, client)
                 else:
                     self.forward2sb(con, client, room)
+            if messagetype[msgtype] == "askstatus":
+                user = "Here:\n"
+                for c in self.clients:
+                    user = user + f"{self.cAccount[c]}\n"
+                self.forward2sb(user, client, 0, 2)
+                
 
     #forward the message to all the client
     def forward(self, msg, client):
@@ -62,13 +69,21 @@ class sever:
                 c.send(msg_send.encode())
 
     #forward the message to someone special
-    def forward2sb(self, msg, client, droom):
-        msg_send = generate_msg(0, droom, ((self.cAccount[client])+" "+time.strftime("%a %b %d %H:%M:%S %Y", time.localtime())+"\n"+msg))
+    def forward2sb(self, msg, sclient, droom, type=0):
+        if messagetype[type] == "normal message": 
+            msg_send = generate_msg(type, droom, ((self.cAccount[sclient])+" "+time.strftime("%a %b %d %H:%M:%S %Y", time.localtime())+"\n"+msg))
+        if messagetype[type] == "connection":
+            msg_send = generate_msg(type, 0, msg)
+        if messagetype[type] == "askstatus":
+            msg_send = generate_msg(type, 0, msg)
         print(msg_send)
         print("\n")
-        for c in self.clients:
-            if (self.cAccount[c] == roomtype[droom]):
-                c.send(msg_send.encode())
+        if droom != 0: #have a special destination
+            for c in self.clients:
+                if (self.cAccount[c] == roomtype[droom]):
+                    c.send(msg_send.encode())
+        else: #to the source
+            sclient.send(msg_send.encode())
 
 
     #close the connection with a client

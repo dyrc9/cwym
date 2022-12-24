@@ -1,35 +1,46 @@
 from threading import Thread
 import time
-
+import sys
+from utils import *
+import string
 
 from TCPclient import client
 import PySimpleGUI as sg
+
+
 
 #because received message should be print to the gui, I rewrite the receive function
 def receive(client, window):
     while True:
         try:
             msg = client.recv(1024).decode()
-            window.write_event_value(
-                "-RECEIVE-",
-                (
-                    time.strftime("%a %b %d %H:%M:%S %Y", time.localtime()),
-                    msg,
-                )
-            )
+            
         except:
+            print("receive wrong")
             window.write_event_value(
                 "-RECEIVEERROR-",
                 time.strftime("%a %b %d %H:%M:%S %Y", time.localtime()),
             )
             exit()
+        msgtype, room, msgcontent = analysis_msg(msg)
+        #print(msg) #for test
+        window.write_event_value(
+            "-RECEIVE-",
+            (
+                time.strftime("%a %b %d %H:%M:%S %Y", time.localtime()),
+                msgtype,
+                room,
+                msgcontent
+            )
+        )
 
 
 
 def main():
     aclient = client()
 
-    userid = "alice"
+    userid = "nobody"
+    cncted = 0 #make sure only connect once
 
     #the gui of client
     sg.theme("BlueMono")
@@ -40,24 +51,24 @@ def main():
             sg.Text(
                 f"Nickname: {userid}", font="Franklin 12 bold", text_color="blue"
             ),
-        #     sg.Push(),
-        #     sg.Combo(  # sg.Combo sg.OptionMenu
-        #         [
-        #             "Square",
-        #             "Private Room 1",
-        #             "Private Room 2",
-        #             "Private Room 3",
-        #             "Private Room 4",
-        #             "Private Room 5",
-        #         ],
-        #         font="Franklin 12",
-        #         size=(13, 10),
-        #         default_value="Square",
-        #         enable_events=True,
-        #         readonly=True,
-        #         background_color='#FFFFFF',
-        #         key="-ROOMS_OPTION-",
-        #     ),
+            sg.Push(),
+            sg.Combo(  # sg.Combo sg.OptionMenu
+                [
+                    "Square",
+                    "Private Room 1",
+                    "Private Room 2",
+                    "Private Room 3",
+                    "Private Room 4",
+                    "Private Room 5",
+                ],
+                font="Franklin 12",
+                size=(13, 10),
+                default_value="Square",
+                enable_events=True,
+                readonly=True,
+                background_color='#FFFFFF',
+                key="-ROOMS_OPTION-",
+            ),
          ],
         #the output 
         [
@@ -111,20 +122,44 @@ def main():
         
         if event == "-RECEIVE-":
             val = values[event]
-            time = val[0]
-            msg = val[1]
+            clock = val[0]
+            msgtp = val[1] #the type of the message
+            room = val[2]
+            msg = val[3]
             bg_color = "#ffd258"
-            sg.cprint(
-                f"{msg}\n",
-                c=("#000000", bg_color),
-            )
+            # sg.cprint(
+            #             f"{msg}\n",
+            #             c=("#000000", bg_color),
+            #         )
+            if messagetype[msgtp] == "normal message":
+                if roomtype[room] == "Square" or roomtype[room] == values["-ROOMS_OPTION-"]:
+                    sg.cprint(
+                        f"{msg}\n",
+                        c=("#000000", bg_color),
+                    )
+            if messagetype[msgtp] == "connection":
+                if cncted == 0:
+                    cncted = 1
+                    userid = msg       
 
         if event == "-SEND-":
             msg = f"{values['-INPUT-']}"
-            aclient.sendmsg(msg)
+            room = values["-ROOMS_OPTION-"]
+            if room == "Square":
+                roomtp = 0
+            else:
+                roomtp = int(room[-1])
+            msg_send = generate_msg(0, 0, msg)
+            aclient.sendmsg(msg_send)
+            bg_color = "#66FFFF"
+            sg.cprint(
+                (userid+time.strftime("%a %b %d %H:%M:%S %Y", time.localtime())+"\n"+msg+"\n"),
+                c=("#000000", bg_color),
+            )
             window["-INPUT-"].update("")
 
     window.close()
+    sys.exit()
 
 if __name__ == "__main__":
     main()

@@ -14,6 +14,7 @@ class client:
     def sendmsg(self, msg):
         self.clientSocket.send(msg.encode())
 
+    #the below functions are for test. actually now it is useless
     def sendmegwork(self):
         while True:
             try:

@@ -34,7 +34,8 @@ def receive(client, window):
             )
         )
 
-
+#Here is the code of file transfer
+#To Do
 
 def main():
     aclient = client()
@@ -50,7 +51,7 @@ def main():
     sg.theme(theme)
     #roomid = "test"
     layout = [
-        [sg.Titlebar("Chat Client")],
+        [sg.Titlebar("CWYM Chatroom")],
         [
             sg.Text(
                 f"Nickname: {userid}", key = "-NAME-", font="Franklin 12 bold", text_color="blue"
@@ -83,7 +84,6 @@ def main():
                 no_scrollbar=True,
                 size=(50, 20),
                 text_color="black",
-                # background_color=rooms_color[current_room_name],
                 horizontal_scroll=True,
                 autoscroll=True,
                 echo_stdout_stderr=True,
@@ -108,42 +108,53 @@ def main():
         ],
         [
             sg.Button("Send", size=(12, 1), key="-SEND-", button_color="#219F94"),
+            sg.Button("File transfer", size=(12,1), key="-FILE-"),
             sg.Push(),
-            # sg.Button("Save Chat As...", key="-SAVE_LOG-"),
             sg.Button("Who are here?", size=(12,1), key="-ANYONE-"),
             sg.Button("Exit", size=(12, 1), key="-EXIT-"),
         ],
     ]
+
+    #init the gui window
     window = sg.Window("", layout, finalize=True)
     sg.cprint_set_output_destination(window, "-OUTPUT-")
 
     #init receive thread
     Thread(target=receive, args=(aclient.clientSocket, window), daemon=True).start()
+    fltransfer = 0
 
+    #the main loop
     while True:
         event, values = window.read()
 
+        #exit the chat room
         if event in [sg.WIN_CLOSED, "-EXIT-"]:
             break
-        
+
+        #receive the message
         if event == "-RECEIVE-":
             val = values[event]
-            clock = val[0]
+            clock = val[0] #not used yet
             msgtp = val[1] #the type of the message
-            room = val[2]
-            msg = val[3]                                    
+            room = val[2] #the type of the room
+            msg = val[3] #the raw message     
+
+            #The message is normal message, which means it is from other client.                             
             if messagetype[msgtp] == "normal message":
+                #The message is for all the user in the chatroom.
                 if roomtype[room] == "Square":
                     sg.cprint(
                         f"{msg}\n",
                         c=("#000000", bg_color_sqr),
                     )
+                #The message is for only you.
                 else:
                     sg.cprint(
                         f"{msg}\n",
                         c=("#000000", bg_color_pri),
                     )
 
+            #the message is from the server for the first time connected
             if messagetype[msgtp] == "connection": #get the username
                 userid = msg
                 sg.cprint(
@@ -152,13 +163,14 @@ def main():
                 )
                 window["-NAME-"].update(f"Your name: {userid}")
 
+            #the message feedback when you click the botton "Who are here?"
             if messagetype[msgtp] == "askstatus":
                 sg.cprint(
                         f"{msg}\n",
                         c=("#000000", bg_color_sys),
                     )
 
-
+        #send the message
         if event == "-SEND-":
             msg = f"{values['-INPUT-']}"
             room = values["-ROOMS_OPTION-"]
@@ -182,11 +194,28 @@ def main():
             )
             window["-INPUT-"].update("")
 
+        #click the botton "Who are here?"
         if event == "-ANYONE-":
             msg_send = generate_msg(2, 0, 1)
             aclient.sendmsg(msg_send)
 
-
+        #click to start the file transfer service
+        if event == "-FILE-":
+            if fltransfer == 0:
+                sg.cprint(
+                    f"Go into the file transfer successfully!\n",
+                    c=("#000000", bg_color_sys),
+                )
+                fltransfer = 1
+                sg.popup("File Transfer haven't be achieved yet.\n")
+                fltransfer = 0
+            
+            else:
+                sg.cprint(
+                    f"You have open a File Transfer\n",
+                    c=("#000000", bg_color_sys),
+                )
+            
     window.close()
     sys.exit()
 

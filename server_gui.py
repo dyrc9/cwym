@@ -29,8 +29,6 @@ def main():
         [
             sg.Button("Status", key="-GET_STATUS-"),
             sg.Push(),
-            sg.Button("Save Log As...", key="-SAVE_LOG-"),
-            sg.Text(" "),
             sg.Button("Exit", size=(12, 1), key="-EXIT-"),
         ],
     ]
